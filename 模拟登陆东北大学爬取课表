@@ -1,0 +1,41 @@
+import requests
+from lxml import etree
+
+login_url = 'https://pass.neu.edu.cn/tpass/login'
+post_url = 'https://pass.neu.edu.cn/tpass/login?service=https%3A%2F%2Fportal.neu.edu.cn%2Ftp_up%2F'
+logined_url = 'http://219.216.96.4/eams/courseTableForStd!courseTable.action'
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko'
+    ') Chrome/84.0.4147.89 Safari/537.36 SLBrowser/7.0.0.9231 SLBChan/25',
+    'Referer': 'http://219.216.96.4/eams/courseTableForStd!courseTable.action',
+    # 'Cookie': 'semester.id=56; JSESSIONID=78C3867BF2308093E64FE5BA61DFBE35.std23; SERVERNAME=xk5; GSESSIONID=78C3867BF2308093E64FE5BA61DFBE35.std23'
+}
+session = requests.session()
+reps = session.get(login_url)
+html = etree.HTML(reps.text)
+Lt = html.xpath('//*[@id="lt"]/@value')[0]
+execution = html.xpath('//*[@id="loginForm"]/input[5]/@value')[0]
+_eventId = html.xpath('//*[@id="loginForm"]/input[6]/@value')[0]
+username = '20205923'
+password = 'HU158071354'
+data = {
+    'rsa':username+password+Lt,
+    'ul':'8',
+    'pl':'11',
+    'lt':Lt,
+    'execution':execution,
+    '_eventId':_eventId,
+}
+post_reps = session.post(post_url,data=data)
+week = '9';
+post_data = {
+    'ignoreHead':'1',
+    'showPrintAndExport':'1',
+    'setting.kind':'std',           #学生课表（class为班级课表）
+    'startWeek':week,
+    'project.id':'1',
+    'semester.id':'56',
+    'ids':'73427'
+}
+table = session.post(logined_url,data=post_data,headers=headers)
+print(table.text)
