@@ -16,8 +16,8 @@ html = etree.HTML(reps.text)
 Lt = html.xpath('//*[@id="lt"]/@value')[0]
 execution = html.xpath('//*[@id="loginForm"]/input[5]/@value')[0]
 _eventId = html.xpath('//*[@id="loginForm"]/input[6]/@value')[0]
-username = '20205923'
-password = 'HU158071354'
+username = 'username'
+password = 'password'
 data = {
     'rsa':username+password+Lt,
     'ul':'8',
