@@ -1,0 +1,24 @@
+from selenium.webdriver import Chrome
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.options import Options
+import time
+opt = Options()
+opt.add_argument('--headless')
+opt.add_argument('--disbale-gpu')
+opt.add_argument('--disable-blinkfeatures=AutomationControlled')
+web = Chrome(options=opt)
+username = 'username'           #学生学号
+password = 'password'    #学生密码
+web.get('https://e-report.neu.edu.cn/notes/create')
+time.sleep(1)
+web.find_element_by_xpath('//*[@id="un"]').send_keys(username)
+web.find_element_by_xpath('//*[@id="pd"]').send_keys(password,Keys.ENTER)
+time.sleep(1)
+web.find_element_by_xpath('//*[@id="bind_email_later"]').click()
+time.sleep(2)
+web.find_element_by_xpath('//*[@id="app"]/main/div/form/div[1]/table/tbody/tr/td[1]/div/div/div/label[1]/span[1]/span').click()
+time.sleep(2)
+web.find_element_by_xpath('//*[@id="app"]/main/div/form/div[3]/div[2]/table/tbody/tr[1]/td/div/div/div/label[1]/span[1]/span').click()
+web.find_element_by_xpath('//*[@id="app"]/main/div/form/div[4]/div[2]/table/tbody/tr[1]/td/div/div/div/label[1]/span[2]').click()
+web.find_element_by_xpath('//*[@id="app"]/main/div/form/div[6]/button/span').click()
+print("over!!")
