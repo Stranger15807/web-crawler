@@ -1,0 +1,46 @@
+import requests
+from lxml import etree
+
+
+class Login(object):
+    def __init__(self):
+        self.headers = {
+            'referer': 'https://github.com/login?return_to=https%3A%2F%2Fgithub.com%2Fsignup%3Fref_cta%3DSign%'
+                       '2Bup%26ref_loc%3Dheader%2Blogged%2Bout%26ref_page%3D%252F%26source%3Dheader-home',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Ch'
+                          'rome/84.0.4147.89 Safari/537.36 SLBrowser/7.0.0.9231 SLBChan/25',
+        }
+        self.login_url = 'https://github.com/login'
+        self.post_url = 'https://github.com/session'
+        self.logined_url = 'https://github,com/settings/profile'
+        self.session = requests.session()
+
+    def token(self):
+        reps = self.session.get(self.login_url,proxies=self.proxies)
+        html = etree.HTML(reps.text)
+        token = html.xpath('//*[@id="login"]/div[4]/form/input[1]/@value')[0]
+        return token
+
+    def login(self, email, password):
+        post_data = {
+            'commit': 'Sign in',
+            'authenticity_token': self.token(),
+            'login': email,
+            'password': password,
+            'trusted_device': '',
+            'webauthn-support': 'supported',
+            'webauthn-iuvpaa-support': 'unsupported',
+            'return_to':'https://github.com/signup?ref_cta=Sign+up&ref_loc=header+logged+out&ref_page=%2F&source=header-home',
+            'allow_signup':'',
+            'client_id':'',
+            'integration':'',
+            'required_field_ae95':'',
+            'timestamp':'1635836474254',
+            'timestamp_secret':'69f1f7c42d3d5fed614545692b4819ec38e43e4e2fae1523787599d9daf6e3b1'
+            }
+        reps = self.session.post(self.post_url,data=post_data,headers=self.headers)
+        print(reps.text)
+
+if __name__ == '__main__':
+    login = Login()
+    login.login('email','password')
