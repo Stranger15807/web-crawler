@@ -1,0 +1,99 @@
+import requests
+from Crypto.Cipher import AES
+from base64 import b64encode
+import json
+import re
+data = {
+'csrf_token': "",
+'cursor': '-1',
+'offset': '0',
+'orderType': '1',
+'pageNo':'1',
+'pageSize': '20',
+'rid': 'R_SO_4_1378491298',
+"threadId":'R_SO_4_1378491298'
+}
+url = 'https://music.163.com/weapi/comment/resource/comments/get?csrf_token='
+e = '010001'
+f = '00e0b509f6259df8642dbc35662901477df22677ec152b5ff68ace615bb7b725152b3ab17a876aea8a5aa76d2e417629ec4ee341f56135fccf695280104e0312ecbda92557c93870114af6c9d05c4f7f0c3685b7a46bee255932575cce10b424d813cfe4875d3e82047b97ddef52741d546b8e289dc6935b3ece0462db0a22b8e7'
+g = '0CoJUm6Qyw8W8jud'
+i = "jQP7rbrpjzLIVqJA"
+def encSecKey():
+    return "49159d9d8057c66352ad3001ebc2435927ef791d3ee81fdb6d0587fdbcfb831177551323573daded52bbbe5ebaf3c423ddfc92e043384608f886648c5750c84eea0126a9e04daaf2185bf7b0b8c3928d0e97036e5048388b4f73f87d2a109a8281cdd99d0d9926e7a0f78ef05eff92071e2b3cc96acdf58876c867f11142b2d4"
+def to16(data):
+    pad = 16 - len(data) % 16
+    data += chr(pad) * pad
+    return data
+def encText(data,key): #加密过程
+    iv = "0102030405060708"
+    data = to16(data)
+    aes = AES.new(key=key.encode('utf-8'),IV=iv.encode('utf-8'),mode=AES.MODE_CBC) #创建加密器
+    bs = aes.encrypt(data.encode('utf-8')) #加密
+    return str(b64encode(bs),"utf-8") #转化成字符串
+def getText(data):
+    t = encText(data,g)
+    s = encText(t,i)
+    return s
+
+"""function a(a) {
+        var d, e, b = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", c = "";
+        for (d = 0; a > d; d += 1)
+            e = Math.random() * b.length,
+            e = Math.floor(e),
+            c += b.charAt(e);
+        return c
+    }
+    function b(a, b) {
+        var c = CryptoJS.enc.Utf8.parse(b)
+          , d = CryptoJS.enc.Utf8.parse("0102030405060708")
+          , e = CryptoJS.enc.Utf8.parse(a)
+          , f = CryptoJS.AES.encrypt(e, c, {
+            iv: d,
+            mode: CryptoJS.mode.CBC
+        });
+        return f.toString()
+    }
+    function c(a, b, c) {
+        var d, e;
+        return setMaxDigits(131),
+        d = new RSAKeyPair(b,"",c),
+        e = encryptedString(d, a)
+    }
+    function d(d, e, f, g) {
+        var h = {}
+          , i = a(16);
+        h.encText = b(d, g),
+        h.encText = b(h.encText, i),
+        h.encSecKey = c(i, e, f),
+        return h
+    }
+    function e(a, b, d, e) {
+        var f = {};
+        return f.encText = c(a + e, b, d),
+        f
+    }"""
+if __name__ == '__main__':
+    num = eval(input("请输入你要爬取的评论页数"))
+    data['pageSize'] = str(num*20)
+    data['pageNo'] = str(num)
+    pos_data = {
+        'params': getText(json.dumps(data)),
+        'encSecKey':encSecKey()
+    }
+    headers = {
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36 Edg/93.0.961.52'
+    }
+    reps = requests.post(url,data=pos_data,headers=headers)
+    reps.encoding = 'utf-8'
+    obj = re.compile(r'hotComments.*？',re.S)
+    s = obj.search(reps.text)
+    obj2 = re.compile(r'"content":(?P<comments>.*?),',re.S)
+    obj3 = re.compile(r'"nickname":(?P<name>.*?),',re.S)
+    s2 = obj2.finditer(reps.text)
+    s3 = obj3.finditer(reps.text)
+    with open('网易云.txt','w+',encoding='utf-8') as f:
+        for it,it2 in zip(s2,s3):
+            text = it.group('comments').replace('n','')
+            text2 = text.replace('\\','')
+            f.write('nickname:'+it2.group('name')+':\n'+text2+'\n')
+print('over!!!')
